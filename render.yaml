@@ -1,0 +1,15 @@
+services:
+  - type: web
+    name: scan-gem-flow
+    env: static
+    buildCommand: npm install && npm run build
+    staticPublishPath: dist
+    envVars:
+      - key: VITE_SUPABASE_URL
+        value: https://azrpldopnskcaoupaker.supabase.co
+      - key: VITE_SUPABASE_ANON_KEY
+        value: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImF6cnBsZG9wbnNrY2FvdXBha2VyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzgwNTI4NDIsImV4cCI6MjA5MzYyODg0Mn0.80BI7_pT1pCowvkyDGUW89n_H2ZcF1UfH1CRXesiXMc
+    routes:
+      - type: rewrite
+        source: /*
+        destination: /index.html

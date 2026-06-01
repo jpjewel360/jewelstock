@@ -1,0 +1,176 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --gold: #c98a12;
+  --gold-light: #e5a825;
+  --gold-dim: #7d500e;
+  --bg: #0a0806;
+  --bg-card: #141009;
+  --bg-elevated: #1e170d;
+  --border: #2a2012;
+  --text: #f5ead8;
+  --text-muted: #8a7560;
+  --danger: #c0392b;
+  --success: #27ae60;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  background-color: var(--bg);
+  color: var(--text);
+  font-family: 'DM Sans', sans-serif;
+  min-height: 100vh;
+  margin: 0;
+}
+
+/* Grain overlay */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+  pointer-events: none;
+  z-index: 9999;
+  opacity: 0.4;
+}
+
+@layer components {
+  .card {
+    @apply bg-[#141009] border border-[#2a2012] rounded-xl;
+  }
+  .btn-gold {
+    @apply bg-gold-500 hover:bg-gold-400 text-obsidian-900 font-semibold px-4 py-2 rounded-lg transition-all duration-200 text-sm;
+  }
+  .btn-ghost {
+    @apply border border-[#2a2012] hover:border-gold-600 text-[#8a7560] hover:text-[#f5ead8] px-4 py-2 rounded-lg transition-all duration-200 text-sm;
+  }
+  .input {
+    @apply bg-[#1e170d] border border-[#2a2012] rounded-lg px-3 py-2 text-[#f5ead8] placeholder-[#4a3c2a] text-sm w-full focus:outline-none focus:border-gold-600 transition-colors;
+  }
+  .badge-admin {
+    @apply bg-gold-900 text-gold-300 text-xs px-2 py-0.5 rounded-full font-mono;
+  }
+  .badge-staff {
+    @apply bg-obsidian-600 text-[#8a7560] text-xs px-2 py-0.5 rounded-full font-mono;
+  }
+  .badge-available {
+    @apply bg-green-900/40 text-green-400 text-xs px-2 py-0.5 rounded-full;
+  }
+  .badge-sold {
+    @apply bg-red-900/40 text-red-400 text-xs px-2 py-0.5 rounded-full;
+  }
+  .badge-audit {
+    @apply bg-blue-900/40 text-blue-400 text-xs px-2 py-0.5 rounded-full;
+  }
+}
+
+/* Scrollbar */
+::-webkit-scrollbar { width: 4px; }
+::-webkit-scrollbar-track { background: var(--bg); }
+::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+
+/* Animations */
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.fade-up { animation: fadeUp 0.3s ease forwards; }
+
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+.shimmer {
+  background: linear-gradient(90deg, #1e170d 25%, #2a2012 50%, #1e170d 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+}
+
+.qr-label-print {
+  width: 65mm;
+  height: 15mm;
+  position: relative;
+  overflow: hidden;
+  background: #ffffff;
+  border: 1px solid #d8d8d8;
+  color: #000000;
+  font-family: Arial, Helvetica, sans-serif;
+  text-align: left;
+}
+
+.qr-label-print__qr {
+  position: absolute;
+  left: 1.5mm;
+  top: 1mm;
+  width: 13mm;
+  height: 13mm;
+  object-fit: contain;
+  image-rendering: pixelated;
+}
+
+.qr-label-print__details {
+  position: absolute;
+  left: 38mm;
+  top: 1.5mm;
+  right: 1.5mm;
+  display: grid;
+  gap: 0.2mm;
+  font-size: 5.2pt;
+  font-weight: 700;
+  line-height: 1.05;
+  letter-spacing: 0;
+}
+
+.qr-label-print__details span {
+  font-weight: 800;
+}
+
+.qr-label-print__product {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 5.8pt;
+  font-weight: 800;
+}
+
+@media print {
+  @page {
+    size: 65mm 15mm;
+    margin: 0;
+  }
+
+  html,
+  body,
+  #root {
+    width: 65mm;
+    height: 15mm;
+    margin: 0;
+    overflow: hidden;
+    background: #ffffff;
+  }
+
+  body::before {
+    display: none;
+  }
+
+  body * {
+    visibility: hidden !important;
+  }
+
+  .qr-label-print,
+  .qr-label-print * {
+    visibility: visible !important;
+  }
+
+  .qr-label-print {
+    position: fixed;
+    inset: 0;
+    width: 65mm !important;
+    height: 15mm !important;
+    border: 0 !important;
+    box-shadow: none !important;
+  }
+}

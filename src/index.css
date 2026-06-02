@@ -72,6 +72,30 @@ body::before {
 ::-webkit-scrollbar-track { background: var(--bg); }
 ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
 
+@media (max-width: 767px) {
+  .p-8 {
+    padding: 1rem !important;
+  }
+
+  .card.overflow-hidden {
+    overflow-x: auto;
+  }
+
+  table {
+    min-width: 560px;
+  }
+
+  h1.font-display {
+    font-size: 1.75rem;
+    line-height: 1.15;
+  }
+
+  .btn-gold,
+  .btn-ghost {
+    white-space: nowrap;
+  }
+}
+
 /* Animations */
 @keyframes fadeUp {
   from { opacity: 0; transform: translateY(12px); }

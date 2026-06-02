@@ -160,21 +160,21 @@ export default function Inventory() {
             }
             .qr {
               position: absolute;
-              left: 1.5mm;
+              left: -8mm;
               top: 1.8mm;
-              width: 13mm;
-              height: 13mm;
+              width: 12.5mm;
+              height: 12.5mm;
               object-fit: contain;
               image-rendering: pixelated;
             }
             .details {
               position: absolute;
-              left: 38mm;
+              left: 30mm;
               top: 2mm;
-              right: 1.5mm;
+              right: 5mm;
               display: grid;
               gap: 0.35mm;
-              font-size: 6.4pt;
+              font-size: 6pt;
               font-weight: 800;
               line-height: 1.1;
               letter-spacing: 0;
@@ -185,7 +185,7 @@ export default function Inventory() {
               overflow: hidden;
               text-overflow: ellipsis;
               white-space: nowrap;
-              font-size: 7.2pt;
+              font-size: 6.8pt;
             }
           </style>
         </head>

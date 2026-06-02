@@ -160,18 +160,18 @@ export default function Inventory() {
             }
             .qr {
               position: absolute;
-              left: -8mm;
-              top: 1.8mm;
-              width: 12.5mm;
-              height: 12.5mm;
+              left: 12mm;
+              top: 1.6mm;
+              width: 12mm;
+              height: 12mm;
               object-fit: contain;
               image-rendering: pixelated;
             }
             .details {
               position: absolute;
-              left: 30mm;
+              left: 35mm;
               top: 2mm;
-              right: 5mm;
+              right: 2.5mm;
               display: grid;
               gap: 0.35mm;
               font-size: 6pt;

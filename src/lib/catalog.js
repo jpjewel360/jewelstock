@@ -106,10 +106,14 @@ export function saveStoredDemoSales(sales) {
 
 export function addStoredDemoSale(item, sale = {}) {
   const sales = getStoredDemoSales()
+  const salePrice = Number(sale.sale_price ?? item.purchase_price ?? 0)
+  const purchaseRate = Number(sale.purchase_rate ?? item.purchase_price ?? 0)
   const record = {
     id: `demo-sale-${Date.now()}`,
     inventory_item_id: item.id,
-    sale_price: sale.sale_price ?? item.purchase_price ?? 0,
+    sale_price: salePrice,
+    purchase_rate: purchaseRate,
+    profit: Number(sale.profit ?? salePrice - purchaseRate),
     buyer_name: sale.buyer_name ?? null,
     buyer_phone: sale.buyer_phone ?? null,
     sold_at: new Date().toISOString(),

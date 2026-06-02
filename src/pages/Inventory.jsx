@@ -160,7 +160,7 @@ export default function Inventory() {
             }
             .qr {
               position: absolute;
-              left: -2mm;
+              left: 3mm;
               top: 1.6mm;
               width: 12mm;
               height: 12mm;

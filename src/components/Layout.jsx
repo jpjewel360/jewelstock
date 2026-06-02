@@ -43,7 +43,7 @@ export default function Layout() {
         </div>
 
         {/* Nav */}
-        <nav className="flex md:flex-1 gap-2 md:gap-0 overflow-x-auto md:overflow-visible px-3 py-3 md:py-4 md:space-y-0.5">
+        <nav className="flex md:flex-col md:flex-1 gap-2 md:gap-0 overflow-x-auto md:overflow-visible px-3 py-3 md:py-4 md:space-y-0.5">
           {navItems.map(({ to, icon: Icon, label, exact }) => (
             <NavLink
               key={to}

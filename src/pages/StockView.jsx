@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { supabase } from '../lib/supabase'
 import { useAuth } from '../hooks/useAuth.jsx'
-import { Boxes, Layers, Package } from 'lucide-react'
+import { Boxes, Download, FileText, Layers, Package } from 'lucide-react'
 import { getStoredDemoItems, getStoredDemoTypes, getTypeFields, itemFieldValue, itemProductName } from '../lib/catalog.js'
 
 export default function StockView() {
@@ -42,16 +42,24 @@ export default function StockView() {
     const productMatch = productFilter === 'all' || itemProductName(item) === productFilter
     return categoryMatch && productMatch
   })
-  const selectedCategory = types.find(type => type.id === categoryFilter || type.name === categoryFilter)
-  const selectedItemType = selectedCategory ?? types.find(type => type.id === filteredItems[0]?.product_type_id || type.name === filteredItems[0]?.product_types?.name)
-  const dynamicFields = getTypeFields(selectedItemType).filter(field => field.id !== 'weight_grams')
+  const dynamicFields = getDynamicFields(filteredItems, types)
   const totalWeight = filteredItems.reduce((sum, item) => sum + Number(item.weight_grams || 0), 0)
 
   return (
     <div className="p-8 fade-up">
-      <div className="mb-8">
-        <h1 className="font-display text-2xl text-[#f5ead8]">Stock View</h1>
-        <p className="text-[#4a3c2a] text-sm mt-1">Category, product and item stock with counts and weights</p>
+      <div className="mb-8 flex flex-col lg:flex-row lg:items-end lg:justify-between gap-4">
+        <div>
+          <h1 className="font-display text-2xl text-[#f5ead8]">Stock View</h1>
+          <p className="text-[#4a3c2a] text-sm mt-1">Category, product and item stock with counts and weights</p>
+        </div>
+        <div className="flex flex-col sm:flex-row gap-2">
+          <button onClick={() => downloadStockCsv(filteredItems, dynamicFields)} className="btn-ghost flex items-center justify-center gap-2 px-4 py-2">
+            <Download size={14} /> Download Excel
+          </button>
+          <button onClick={() => downloadStockPdf(filteredItems, dynamicFields)} className="btn-gold flex items-center justify-center gap-2 px-4 py-2">
+            <FileText size={14} /> Download PDF
+          </button>
+        </div>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 mb-6">
@@ -170,4 +178,100 @@ function summarize(items, getName) {
     grouped.set(name, current)
   })
   return Array.from(grouped.values()).sort((a, b) => a.name.localeCompare(b.name))
+}
+
+function getDynamicFields(items, types) {
+  const fields = new Map()
+  items.forEach(item => {
+    const type = types.find(row => row.id === item.product_type_id || row.name === item.product_types?.name) ?? item.product_types
+    getTypeFields(type).forEach(field => {
+      if (field.id !== 'weight_grams') fields.set(field.id, field)
+    })
+  })
+  return Array.from(fields.values())
+}
+
+function stockRows(items, dynamicFields) {
+  return items.map(item => {
+    const row = {
+      Serial: item.serial_number ?? '',
+      Category: item.product_types?.name ?? '',
+      Product: itemProductName(item),
+      Weight: `${Number(item.weight_grams || 0).toFixed(2)}g`,
+      Status: item.status ?? 'available',
+    }
+    dynamicFields.forEach(field => {
+      row[field.label] = itemFieldValue(item, field) || ''
+    })
+    return row
+  })
+}
+
+function downloadStockCsv(items, dynamicFields) {
+  const data = stockRows(items, dynamicFields)
+  const headers = Object.keys(data[0] ?? {
+    Serial: '', Category: '', Product: '', Weight: '', Status: ''
+  })
+  const csv = [
+    headers.join(','),
+    ...data.map(row => headers.map(header => `"${String(row[header] ?? '').replace(/"/g, '""')}"`).join(','))
+  ].join('\n')
+  const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' })
+  const link = document.createElement('a')
+  link.href = URL.createObjectURL(blob)
+  link.download = `stock-items-${dateKey(new Date())}.csv`
+  link.click()
+  URL.revokeObjectURL(link.href)
+}
+
+function downloadStockPdf(items, dynamicFields) {
+  const data = stockRows(items, dynamicFields)
+  const headers = Object.keys(data[0] ?? {
+    Serial: '', Category: '', Product: '', Weight: '', Status: ''
+  })
+  const htmlRows = data.map(row => `
+    <tr>${headers.map(header => `<td>${escapeHtml(row[header])}</td>`).join('')}</tr>
+  `).join('')
+  const win = window.open('', '_blank', 'width=1100,height=800')
+  if (!win) return
+  win.document.write(`
+    <html>
+      <head>
+        <title>Stock Items</title>
+        <style>
+          body { font-family: Arial, sans-serif; padding: 24px; color: #111; }
+          h1 { margin: 0 0 6px; font-size: 22px; }
+          p { margin: 0 0 20px; color: #555; }
+          table { width: 100%; border-collapse: collapse; font-size: 12px; }
+          th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+          th { background: #f3f3f3; }
+        </style>
+      </head>
+      <body>
+        <h1>Stock Items</h1>
+        <p>Generated ${new Date().toLocaleString('en-IN')}</p>
+        <table>
+          <thead><tr>${headers.map(header => `<th>${escapeHtml(header)}</th>`).join('')}</tr></thead>
+          <tbody>${htmlRows || `<tr><td colspan="${headers.length}">No stock found</td></tr>`}</tbody>
+        </table>
+      </body>
+    </html>
+  `)
+  win.document.close()
+  win.focus()
+  setTimeout(() => win.print(), 300)
+}
+
+function dateKey(value) {
+  const d = new Date(value)
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
+}
+
+function escapeHtml(value) {
+  return String(value ?? '')
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#039;')
 }

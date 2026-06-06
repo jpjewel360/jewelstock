@@ -24,7 +24,10 @@ export default function Inventory() {
   const selectedProducts = getTypeProducts(selectedType)
 
   useEffect(() => { fetchAll() }, [])
-  useEffect(() => { if (qrItem && qrCanvasRef.current) generateQR() }, [qrItem])
+  useEffect(() => {
+    setLabelQrSrc('')
+    if (qrItem && qrCanvasRef.current) generateQR()
+  }, [qrItem])
 
   async function fetchAll() {
     if (isDemo) {
@@ -68,6 +71,7 @@ export default function Inventory() {
       setItems(nextItems)
       toast.success(`Demo item added - Serial: ${newItem.serial_number}`)
       setShowAdd(false)
+      setQrItem(newItem)
       setForm({ product_type_id: '', product_name: '', field_values: {}, notes: '' })
       return
     }
@@ -77,7 +81,7 @@ export default function Inventory() {
       .rpc('next_serial', { type_id: form.product_type_id, product_name_input: form.product_name })
     if (serialErr) { toast.error('Serial generation failed'); return }
 
-    const { error } = await supabase.from('inventory_items').insert({
+    const { data: newItem, error } = await supabase.from('inventory_items').insert({
       product_type_id: form.product_type_id,
       product_name: form.product_name,
       serial_number: serialData,
@@ -87,11 +91,14 @@ export default function Inventory() {
       notes: form.notes,
       status: 'available'
     })
+      .select('*, product_types(name, fields, products)')
+      .single()
     if (error) { toast.error(error.message); return }
-    toast.success(`Added — Serial: ${serialData}`)
+    toast.success(`Added - Serial: ${serialData}`)
     setShowAdd(false)
+    setItems(current => [newItem, ...current])
+    setQrItem(newItem)
     setForm({ product_type_id: '', product_name: '', field_values: {}, notes: '' })
-    fetchAll()
   }
 
   async function generateQR() {
@@ -378,7 +385,11 @@ export default function Inventory() {
               <button onClick={downloadQR} className="btn-ghost flex items-center justify-center gap-2">
                 <Download size={14} /> QR PNG
               </button>
-              <button onClick={printLabel} className="btn-gold flex items-center justify-center gap-2">
+              <button
+                disabled={!labelQrSrc}
+                onClick={printLabel}
+                className="btn-gold flex items-center justify-center gap-2 disabled:opacity-60 disabled:cursor-not-allowed"
+              >
                 <Printer size={14} /> Print 65 x 15 mm
               </button>
             </div>

@@ -28,6 +28,12 @@ export default function Inventory() {
     setLabelQrSrc('')
     if (qrItem && qrCanvasRef.current) generateQR()
   }, [qrItem])
+  useEffect(() => {
+    if (!showAdd && !qrItem) return undefined
+    const previousOverflow = document.body.style.overflow
+    document.body.style.overflow = 'hidden'
+    return () => { document.body.style.overflow = previousOverflow }
+  }, [showAdd, qrItem])
 
   async function fetchAll() {
     if (isDemo) {
@@ -302,13 +308,13 @@ export default function Inventory() {
 
       {/* Add Modal */}
       {showAdd && (
-        <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4">
-          <div className="card p-6 w-full max-w-md fade-up">
-            <div className="flex items-center justify-between mb-5">
+        <div className="fixed inset-0 bg-black/70 flex items-start sm:items-center justify-center z-50 p-3 sm:p-4 overflow-y-auto">
+          <div className="card w-full max-w-2xl fade-up max-h-[calc(100vh-1.5rem)] sm:max-h-[calc(100vh-3rem)] overflow-hidden flex flex-col">
+            <div className="flex items-center justify-between px-5 py-4 border-b border-[#2a2012] shrink-0">
               <h2 className="font-display text-lg text-[#f5ead8]">Add Inventory Item</h2>
               <button onClick={() => setShowAdd(false)} className="text-[#4a3c2a] hover:text-[#f5ead8]"><X size={18} /></button>
             </div>
-            <form onSubmit={handleAdd} className="space-y-4">
+            <form onSubmit={handleAdd} className="p-5 overflow-y-auto grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div>
                 <label className="text-xs text-[#6b5a42] mb-1.5 block uppercase tracking-wider">Category</label>
                 <select className="input" value={form.product_type_id} onChange={e => setForm(f => ({ ...f, product_type_id: e.target.value, product_name: '', field_values: {} }))} required>
@@ -343,7 +349,7 @@ export default function Inventory() {
                 <label className="text-xs text-[#6b5a42] mb-1.5 block uppercase tracking-wider">Notes (optional)</label>
                 <input type="text" className="input" value={form.notes} onChange={e => setForm(f => ({ ...f, notes: e.target.value }))} placeholder="Any remarks..." />
               </div>
-              <div className="flex gap-3 pt-2">
+              <div className="sm:col-span-2 flex gap-3 pt-2 sticky bottom-0 bg-[#141009]">
                 <button type="submit" className="btn-gold flex-1">Add Item</button>
                 <button type="button" onClick={() => setShowAdd(false)} className="btn-ghost flex-1">Cancel</button>
               </div>

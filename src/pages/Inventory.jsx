@@ -131,7 +131,9 @@ export default function Inventory() {
     const productName = itemProductName(qrItem)
     const serialNumber = qrItem.serial_number
     const weight = Number(qrItem.weight_grams).toFixed(2)
+    const size = getLabelSize(qrItem)
     const price = qrItem.purchase_price ? Number(qrItem.purchase_price).toLocaleString('en-IN') : ''
+    const sizeLine = size ? `<div><span>SZ:</span> ${size}</div>` : ''
     const priceLine = showPriceOnLabel && price ? `<div><span>PRICE:</span> Rs. ${price}</div>` : ''
     const existingFrame = document.getElementById('label-print-frame')
     if (existingFrame) existingFrame.remove()
@@ -210,6 +212,7 @@ export default function Inventory() {
               <div class="product">${productName}</div>
               <div><span>SN:</span> ${serialNumber}</div>
               <div><span>WT:</span> ${weight} g</div>
+              ${sizeLine}
               ${priceLine}
             </div>
           </div>
@@ -375,6 +378,7 @@ export default function Inventory() {
                   <div className="qr-label-print__product">{itemProductName(qrItem)}</div>
                   <div><span>SN:</span> {qrItem.serial_number}</div>
                   <div><span>WT:</span> {Number(qrItem.weight_grams).toFixed(2)} g</div>
+                  {getLabelSize(qrItem) && <div><span>SZ:</span> {getLabelSize(qrItem)}</div>}
                   {showPriceOnLabel && qrItem.purchase_price && <div><span>PRICE:</span> Rs. {Number(qrItem.purchase_price).toLocaleString('en-IN')}</div>}
                 </div>
               </div>
@@ -406,4 +410,13 @@ export default function Inventory() {
       )}
     </div>
   )
+}
+
+function getLabelSize(item) {
+  if (!item?.field_values) return ''
+  if (item.field_values.size) return item.field_values.size
+  const sizeField = getTypeFields(item.product_types).find(field =>
+    field.id?.toLowerCase() === 'size' || field.label?.toLowerCase() === 'size'
+  )
+  return sizeField ? item.field_values[sizeField.id] ?? '' : ''
 }
